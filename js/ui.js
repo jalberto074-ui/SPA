@@ -42,8 +42,8 @@ export class UIManager {
             });
         }
 
-        // Global Click Listener
-        window.addEventListener('click', (e) => {
+        // Global Click & Touch Listener
+        const handleInteraction = (e) => {
             if (this.isDetailOpen) return;
 
             // Ignore interaction elements
@@ -55,20 +55,23 @@ export class UIManager {
             if (this.currentLabel && this.currentLabel !== "") {
                 this.openDetail(this.currentLabel);
             }
-        });
+        };
+
+        window.addEventListener('click', handleInteraction);
+        window.addEventListener('touchstart', (e) => {
+            // Check if it's a "clean" tap (optional, but good for UX)
+            // For now, simple touchstart to bypass click delays on some devices
+            // But only if not closing or inside a detail
+            handleInteraction(e);
+        }, { passive: true });
     }
 
     updateLabel(label, opacity) {
         if (this.currentLabel !== label) {
             this.labelContainer.innerHTML = '';
             const h1 = document.createElement('h1');
+            h1.className = 'section-label';
             h1.textContent = label;
-            h1.style.fontSize = '4rem'; // Slightly smaller for Spanish long names
-            h1.style.fontWeight = '800';
-            h1.style.color = '#ffffff';
-            h1.style.textShadow = '0 0 30px rgba(0,0,0,0.8)';
-            h1.style.margin = '0';
-            h1.style.letterSpacing = '0.02em';
             this.labelContainer.appendChild(h1);
             this.currentLabel = label;
         }
