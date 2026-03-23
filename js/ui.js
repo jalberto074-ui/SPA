@@ -89,7 +89,7 @@ export class UIManager {
         window.addEventListener('touchmove', (e) => {
             const dx = e.touches[0].clientX - this.touchStartX;
             const dy = e.touches[0].clientY - this.touchStartY;
-            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
                 this.isScrolling = true;
             }
         }, { passive: true });
@@ -110,6 +110,7 @@ export class UIManager {
         };
 
         window.addEventListener('click', handleInteraction);
+        window.addEventListener('touchend', handleInteraction, { passive: true });
     }
 
     updateLabel(label, opacity) {
