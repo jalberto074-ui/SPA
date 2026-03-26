@@ -153,7 +153,7 @@ export class UIManager {
             const detailBody = document.querySelector('.detail-body');
             if (detailBody) {
                 detailBody.innerHTML = `
-                    <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem; color: #66fcf1;">${data.description}</p>
+                    <p stffyle="font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem; color: #66fcf1;">${data.description}</p>
                     <ul style="list-style: none; padding: 0;">
                         ${data.bullets.map(b => `
                             <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
