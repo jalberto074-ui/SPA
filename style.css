@@ -467,6 +467,105 @@ body {
     opacity: 1;
 }
 
+/* --- Upgraded Portfolio Card Styles --- */
+
+.portfolio-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.impact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.impact-stat {
+    background: rgba(102, 252, 241, 0.05);
+    border: 1px solid rgba(102, 252, 241, 0.2);
+    padding: 1.2rem;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.impact-stat:hover {
+    transform: translateY(-5px);
+    background: rgba(102, 252, 241, 0.1);
+}
+
+.impact-stat .stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    margin-bottom: 0.3rem;
+    font-family: 'Outfit';
+}
+
+.impact-stat .stat-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+.portfolio-images {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.project-image-wrap {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    max-width: 100%;
+}
+
+.project-image-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.85;
+    transition: opacity 0.4s ease;
+}
+
+.project-image-wrap:hover img {
+    opacity: 1;
+}
+
+.image-caption {
+    background: rgba(10, 10, 10, 0.9);
+    padding: 0.8rem 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--glass-border);
+    font-family: var(--font-main);
+    letter-spacing: 0.05em;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .portfolio-card {
+        gap: 1.5rem;
+    }
+    
+    .impact-stat .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .detail-body {
+        padding-bottom: 3rem;
+    }
+}
+
 /* Click Hint */
 #click-hint {
     color: var(--accent-color);
