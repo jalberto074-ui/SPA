@@ -59,14 +59,21 @@ export class UIManager {
             });
         }
 
-        // Contact Popup Toggling
+        // Contact Popup Toggling (with mobile fix)
         const toggleContact = (e) => {
+            e.preventDefault();
             e.stopPropagation();
             this.contactPopup.classList.toggle('active');
         };
 
-        if (this.headerContactBtn) this.headerContactBtn.addEventListener('click', toggleContact);
-        if (this.mobileContactBtn) this.mobileContactBtn.addEventListener('click', toggleContact);
+        if (this.headerContactBtn) {
+            this.headerContactBtn.addEventListener('click', toggleContact);
+            this.headerContactBtn.addEventListener('touchend', toggleContact);
+        }
+        if (this.mobileContactBtn) {
+            this.mobileContactBtn.addEventListener('click', toggleContact);
+            this.mobileContactBtn.addEventListener('touchend', toggleContact);
+        }
 
         // Close popup when clicking outside
         window.addEventListener('click', (e) => {
@@ -94,23 +101,30 @@ export class UIManager {
             }
         }, { passive: true });
 
-        // Global Click & Touch Listener
+        // Global Click Listener (Handles card opening)
         const handleInteraction = (e) => {
             if (this.isDetailOpen || this.isScrolling) return;
 
-            // Ignore interaction elements
-            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            // Ignore interaction elements and contact triggers
+            if (e.target.tagName === 'BUTTON' || 
+                e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'TEXTAREA' ||
+                e.target.closest('.contact-trigger') ||
+                e.target.closest('.mobile-contact-trigger') ||
+                e.target.closest('.contact-popup')) {
+                return;
+            }
+
             // Ignore contact section clicks
             if (e.target.closest('.contact-section')) return;
 
-            // If we have a valid label (meaning we are on a skill section), open details
+            // If we have a valid label, open details
             if (this.currentLabel && this.currentLabel !== "") {
                 this.openDetail(this.currentLabel);
             }
         };
 
         window.addEventListener('click', handleInteraction);
-        window.addEventListener('touchend', handleInteraction, { passive: true });
     }
 
     updateLabel(label, opacity) {
@@ -151,18 +165,58 @@ export class UIManager {
         if (data) {
             if (this.detailTitle) this.detailTitle.textContent = title;
             const detailBody = document.querySelector('.detail-body');
+            
             if (detailBody) {
-                detailBody.innerHTML = `
-                    <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem; color: #66fcf1;">${data.description}</p>
-                    <ul style="list-style: none; padding: 0;">
+                let htmlContent = `
+                    <p style="font-size: 1.15rem; line-height: 1.65; margin-bottom: 2rem; color: #ffffff; opacity: 0.9;">${data.description}</p>
+                    <div class="portfolio-card">
+                `;
+
+                // 1. Impact Stats
+                if (data.impact && data.impact.length > 0) {
+                    htmlContent += `
+                        <div class="impact-grid">
+                            ${data.impact.map(stat => `
+                                <div class="impact-stat">
+                                    <span class="stat-value">${stat.value}</span>
+                                    <span class="stat-label">${stat.label}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                // 2. Main Bullets
+                htmlContent += `
+                    <ul style="list-style: none; padding: 0; margin-bottom: 2.5rem;">
                         ${data.bullets.map(b => `
-                            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
-                                <span style="position: absolute; left: 0; color: #66fcf1;">▹</span>
+                            <li style="margin-bottom: 1.2rem; padding-left: 1.8rem; position: relative; font-size: 1rem; color: #ccc;">
+                                <span style="position: absolute; left: 0; color: #66fcf1; font-weight: bold;">▹</span>
                                 ${b}
                             </li>
                         `).join('')}
                     </ul>
                 `;
+
+                // 3. Portfolio Images
+                if (data.images && data.images.length > 0) {
+                    htmlContent += `
+                        <div class="portfolio-images">
+                            ${data.images.map(img => `
+                                <div class="project-image-wrap">
+                                    <img src="${img.url}" alt="${img.caption}" loading="lazy">
+                                    <div class="image-caption">// ${img.caption}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                htmlContent += `</div>`; // Close portfolio-card
+                detailBody.innerHTML = htmlContent;
+                
+                // Ensure scroll is at top
+                document.querySelector('.detail-content').scrollTop = 0;
             }
         }
 
