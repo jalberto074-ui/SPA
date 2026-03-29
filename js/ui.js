@@ -18,13 +18,13 @@ export class UIManager {
         this.labelContainer.style.zIndex = '50';
         document.body.appendChild(this.labelContainer);
 
-        // Click Hint (now a child of labelContainer)
+        // Click Hint
         this.clickHint = document.createElement('div');
         this.clickHint.id = 'click-hint';
         this.clickHint.textContent = "CLICK PARA EXPLORAR";
         this.labelContainer.appendChild(this.clickHint);
 
-        // Label element (will be created in updateLabel)
+        // Label element
         this.labelElement = document.createElement('h1');
         this.labelElement.className = 'section-label';
         this.labelContainer.appendChild(this.labelElement);
@@ -38,7 +38,7 @@ export class UIManager {
         this.hintTimeout = null;
         this.isDetailOpen = false;
 
-        // Touch Tracking for Scroll Guard
+        // Touch Tracking
         this.touchStartX = 0;
         this.touchStartY = 0;
         this.isScrolling = false;
@@ -54,13 +54,20 @@ export class UIManager {
     setupEvents() {
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeDetail();
+            });
+            this.closeBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 this.closeDetail();
             });
         }
 
-        // Contact Popup Toggling
+        // --- Contact Buttons ---
         const toggleContact = (e) => {
+            // Prevent both 'click' and 'touchend' from firing twice or triggering window actions
             e.preventDefault();
             e.stopPropagation();
             this.contactPopup.classList.toggle('active');
@@ -86,7 +93,7 @@ export class UIManager {
             }
         });
 
-        // Robust Mobile Scroll Guard
+        // --- Mobile Interaction Logic ---
         window.addEventListener('touchstart', (e) => {
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
@@ -96,36 +103,32 @@ export class UIManager {
         window.addEventListener('touchmove', (e) => {
             const dx = e.touches[0].clientX - this.touchStartX;
             const dy = e.touches[0].clientY - this.touchStartY;
-            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+            // Sensitivity for panning the universe
+            if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
                 this.isScrolling = true;
             }
         }, { passive: true });
 
-        // Global Click & Touch Listener
         const handleInteraction = (e) => {
-            if (this.isDetailOpen || this.isScrolling) return;
-
-            // Ignore interaction elements and contact triggers
-            if (e.target.tagName === 'BUTTON' || 
-                e.target.tagName === 'INPUT' || 
-                e.target.tagName === 'TEXTAREA' ||
-                e.target.closest('.contact-trigger') ||
-                e.target.closest('.mobile-contact-trigger') ||
-                e.target.closest('.contact-popup')) {
-                return;
-            }
+            // Priority 1: Do nothing if we are scrolling or detail is already open
+            if (this.isScrolling || this.isDetailOpen) return;
             
-            // Ignore contact section clicks
+            // Priority 2: Ignore if the event was already handled by a button (e.preventDefault)
+            if (e.defaultPrevented) return;
+
+            // Priority 3: Ignore known interaction zones
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if (e.target.closest('.contact-section')) return;
 
-            // If we have a valid label (meaning we are on a skill section), open details
+            // Priority 4: Open detail if we have a label
             if (this.currentLabel && this.currentLabel !== "") {
                 this.openDetail(this.currentLabel);
             }
         };
 
+        // Listen for both click and touch to be reactive
         window.addEventListener('click', handleInteraction);
-        window.addEventListener('touchend', handleInteraction, { passive: true });
+        window.addEventListener('touchend', handleInteraction);
     }
 
     updateLabel(label, opacity) {
@@ -134,7 +137,6 @@ export class UIManager {
             this.currentLabel = label;
         }
         this.labelContainer.style.opacity = opacity;
-
         if (opacity < 0.5) {
             this.hideHint();
         } else {
@@ -168,15 +170,10 @@ export class UIManager {
             const detailBody = document.querySelector('.detail-body');
             
             if (detailBody) {
-                // Determine if we have special portfolio data
-                const hasSpecialData = data.impact || data.images;
-
                 let htmlContent = `
                     <p style="font-size: 1.15rem; line-height: 1.65; margin-bottom: 2rem; color: #ffffff; opacity: 0.9;">${data.description}</p>
                     <div class="portfolio-card">
                 `;
-
-                // 1. Impact Stats (If available)
                 if (data.impact && data.impact.length > 0) {
                     htmlContent += `
                         <div class="impact-grid">
@@ -189,8 +186,6 @@ export class UIManager {
                         </div>
                     `;
                 }
-
-                // 2. Main Bullets
                 htmlContent += `
                     <ul style="list-style: none; padding: 0; margin-bottom: 2.5rem;">
                         ${data.bullets.map(b => `
@@ -201,8 +196,6 @@ export class UIManager {
                         `).join('')}
                     </ul>
                 `;
-
-                // 3. Portfolio Images (If available)
                 if (data.images && data.images.length > 0) {
                     htmlContent += `
                         <div class="portfolio-images">
@@ -215,15 +208,11 @@ export class UIManager {
                         </div>
                     `;
                 }
-
-                htmlContent += `</div>`; // Close portfolio-card
+                htmlContent += `</div>`;
                 detailBody.innerHTML = htmlContent;
-                
-                // Ensure scroll is at top
                 document.querySelector('.detail-content').scrollTop = 0;
             }
         }
-
         if (this.detailOverlay) this.detailOverlay.classList.add('active');
     }
 

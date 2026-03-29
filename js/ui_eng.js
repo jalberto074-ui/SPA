@@ -54,6 +54,12 @@ export class UIManager {
     setupEvents() {
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeDetail();
+            });
+            this.closeBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 this.closeDetail();
             });
@@ -93,23 +99,16 @@ export class UIManager {
         window.addEventListener('touchmove', (e) => {
             const dx = e.touches[0].clientX - this.touchStartX;
             const dy = e.touches[0].clientY - this.touchStartY;
-            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+            if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
                 this.isScrolling = true;
             }
         }, { passive: true });
 
         const handleInteraction = (e) => {
-            if (this.isDetailOpen || this.isScrolling) return;
+            if (this.isScrolling || this.isDetailOpen) return;
+            if (e.defaultPrevented) return;
 
-            if (e.target.tagName === 'BUTTON' || 
-                e.target.tagName === 'INPUT' || 
-                e.target.tagName === 'TEXTAREA' ||
-                e.target.closest('.contact-trigger') ||
-                e.target.closest('.mobile-contact-trigger') ||
-                e.target.closest('.contact-popup')) {
-                return;
-            }
-
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if (e.target.closest('.contact-section')) return;
 
             if (this.currentLabel && this.currentLabel !== "") {
@@ -118,7 +117,7 @@ export class UIManager {
         };
 
         window.addEventListener('click', handleInteraction);
-        window.addEventListener('touchend', handleInteraction, { passive: true });
+        window.addEventListener('touchend', handleInteraction);
     }
 
     updateLabel(label, opacity) {
